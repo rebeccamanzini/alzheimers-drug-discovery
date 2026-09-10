@@ -52,3 +52,24 @@ length(overlap) # 1
 # and blood (GSE63060), and is mechanistically consistent with the
 # aerobic/cellular respiration pathways identified via GO enrichment
 # in the primary analysis.
+
+# --- Hypergeometric test: is the overlap more than expected by chance? ---
+# Shared background: genes measured on both microarray platforms
+background <- intersect(unique(platform_data$`Gene symbol`),
+                         unique(platform_data2$`Gene symbol`))
+background <- background[background != "" & !is.na(background)]
+N <- length(background)                                              # 17,201
+K <- length(intersect(unique(sig_genes$gene_symbol), background))     # 1,758 (GSE5281 sig genes on background)
+n <- length(intersect(unique(sig_genes2$gene_symbol), background))    # 2 (GSE63060 sig genes on background)
+x <- length(overlap[overlap != ""])                                   # 1 (NDUFA1)
+
+p_value <- phyper(x - 1, K, N - K, n, lower.tail = FALSE)
+p_value  # 0.194 — not statistically significant
+
+# Result: with only 2 significant blood genes landing on the shared
+# background, this test is underpowered. p = 0.194 means the overlap
+# cannot be distinguished from chance with this sample size — this is
+# reported as an inconclusive validation, not a confirmed replication.
+# The biological plausibility of NDUFA1 (mitochondrial Complex I,
+# consistent with the respiration pathways from GO enrichment) stands
+# independently of this statistical test.
