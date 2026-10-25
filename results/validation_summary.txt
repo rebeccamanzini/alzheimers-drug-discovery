@@ -1,0 +1,7 @@
+Genes measured in both datasets: 11762
+Blood arrays: 249 (AD 145 , control 104 )
+Spearman rho, brain t vs blood t: 0.131  p = 2.24e-46
+Brain-significant genes in both datasets: 1415 ; same direction in blood: 796 ( 56.3 %), binomial p = 2.81e-06
+Brain-higher genes rank higher in AD blood, p = 0.00128
+Brain-lower genes rank lower in AD blood, p = 4.44e-13
+Legacy check, blood genes (adj.P < 0.05, |log2FC| > 1): 3 ; shared with brain primary set: 0

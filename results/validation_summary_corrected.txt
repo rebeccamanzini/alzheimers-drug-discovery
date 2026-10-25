@@ -1,0 +1,5 @@
+Shared genes: 11762
+Spearman rho, moderated t: 0.159  p = 1.27e-67
+Spearman rho, log fold change: 0.151  p = 4.19e-61
+Brain-significant genes in both: 1415 ; same direction in blood: 792 ( 56 %), binomial p = 7.78e-06
+Of those, nominally significant in blood (p < 0.05) with the same direction: 367

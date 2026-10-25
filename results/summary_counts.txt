@@ -1,0 +1,6 @@
+Arrays used: 153 (AD 87 , control 66 )
+Probes tested: 27337
+Significant probes (Model E): 2353
+Higher in AD: 1385  Lower in AD: 968
+Unique genes in drug-mining list: 1627
+Probes shared by Model A and Model E: 1924
