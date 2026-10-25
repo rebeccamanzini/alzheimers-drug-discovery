@@ -67,8 +67,7 @@ Across 11,762 shared genes, brain and blood moderated t statistics showed a smal
 
 ## Limitations
 
-- Bulk post-mortem tissue, so some differences may reflect changes in cell composition or tissue quality, not only disease pathways.
-- A single brain cohort on a microarray platform, with no independent brain replication.
+- Samples are laser-capture microdissected cortical neurons (non-tangle-bearing), so the results describe neurons only and cannot speak to glial changes. The small RNA input per sample makes technical variation from processing plausible, and a spike-in control analysis showed that processing variation differs between AD and control arrays, so diagnosis is partly confounded with technical factors.- A single brain cohort on a microarray platform, with no independent brain replication.
 - The outlier rule was chosen after inspecting the data. Sensitivity analyses show the result is stable, but this should be stated.
 - 6 to 9% of gene symbols did not map in enrichment analysis.
 - DGIdb is not exhaustive and an interaction is not evidence of efficacy. Expression changes may be consequences of disease, not causes.
