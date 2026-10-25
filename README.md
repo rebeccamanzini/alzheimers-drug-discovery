@@ -1,107 +1,84 @@
-# Identifying Druggable Targets in Alzheimer's Disease Through Independent Computational Transcriptomic Analysis
+# Alzheimer's disease brain transcriptomics
 
-**Rebecca Manzini** · Independent project · September 2026
+Differential expression, pathway enrichment and drug-gene mining in post-mortem Alzheimer's disease (AD) brain (GSE5281), with a cross-tissue comparison in blood (GSE63060).
 
 ## Abstract
 
-Alzheimer’s disease (AD) remains a leading cause of dementia with limited disease-modifying treatment options. This project applies an independent computational pipeline to public transcriptomic data to test whether differential expression analysis of AD brain tissue can recover established AD biology and identify genes with existing pharmacological relevance. Using microarray data from 161 post-mortem brain samples (GEO GSE5281), differential expression analysis identified 2,972 significantly dysregulated probes between AD and control tissue. Gene Ontology enrichment pointed to synaptic vesicle transport and mitochondrial and metabolic processes, both established in AD pathology. Querying the top 50 significant genes against the Drug Gene Interaction Database (DGIdb) returned 449 gene-drug interactions across 19 genes. An attempted validation in an independent blood dataset (GSE63060) was inconclusive because too few genes were significant for a powered test. The results are exploratory and are presented as a reproducible pipeline and a set of hypotheses, not as validated targets.
+Alzheimer's disease is a leading cause of dementia with limited disease-modifying treatment. This project analyses public post-mortem brain transcriptomic data (GEO GSE5281; 87 AD and 74 control samples from six brain regions) to test whether a transparent, reproducible pipeline recovers established AD biology and identifies genes with existing pharmacological relevance. After quality control, removal of 8 outlier arrays (tested in sensitivity analyses) and adjustment for brain region, limma identified 2,353 probes that differ between AD and control by at least 1.5-fold (FDR < 0.05), of which 1,385 were higher and 968 lower in AD. Genes lower in AD were strongly enriched for aerobic respiration, ATP synthesis-coupled electron transport and synaptic vesicle transport. Querying the top 50 genes against the Drug Gene Interaction Database (DGIdb) returned 457 interactions across 20 genes, of which 30 across 9 genes were direction-compatible, meaning an inhibitor of a gene that is higher in AD. Comparison with an independent blood cohort (GSE63060) showed modest cross-tissue concordance (Spearman rho = 0.16). The results are exploratory and are presented as hypotheses, not validated targets.
 
-## Research Question
+## Data
 
-Can differential gene expression analysis of AD brain tissue identify dysregulated genes with existing pharmacological relevance, connecting a purely data-driven transcriptomic signature to potential therapeutic targets?
-
-## Dataset
-
-| | |
-|---|---|
-| Source | Gene Expression Omnibus (GEO), accession **GSE5281** |
-| Type | Affymetrix microarray, human post-mortem brain tissue |
-| Platform | GPL570 (Affymetrix Human Genome U133 Plus 2.0 Array) |
-| Groups | Alzheimer's disease (AD) vs. healthy control |
-| Sample size | 161 total (87 AD, 74 control) |
-| Brain regions | Entorhinal cortex, hippocampus, middle temporal gyrus, posterior cingulate, superior frontal gyrus, primary visual cortex |
+- **GSE5281.** Affymetrix Human Genome U133 Plus 2.0 (GPL570), 161 post-mortem brain samples (87 AD, 74 control) from six regions (entorhinal cortex, hippocampus, medial temporal gyrus, posterior cingulate, superior frontal gyrus, primary visual cortex). Region labels were derived from the sample annotation text.
+- **GSE63060.** AddNeuroMed peripheral blood, Illumina HumanHT-12 (GPL6947), AD vs control only (145 AD, 104 control).
+- **DGIdb.** Queried through its GraphQL API on 2026-10-25.
 
 ## Methods
 
-1. **Preprocessing.** Raw expression values log2-transformed (log2(x+1))
-2. **Differential expression.** limma (R/Bioconductor), moderated t-statistics via eBayes
-3. **Multiple testing correction.** Benjamini-Hochberg (BH)
-4. **Significance thresholds.** Adjusted p < 0.05, |log2 fold change| > 1
-5. **Gene annotation.** Probe-to-symbol mapping via GPL570 platform annotation
-6. **Functional enrichment.** GO Biological Process via clusterProfiler
-7. **Drug-target mining.** Top 50 significant genes queried against DGIdb (GraphQL API)
-
-**Tools:** R (limma, GEOquery, clusterProfiler, org.Hs.eg.db, ggplot2, pheatmap), Python (pandas, requests)
+1. **Preprocessing.** Intensities were on a linear scale, so values were log2(x + 1) transformed. Array quality was assessed with sample distributions and PCA.
+2. **Outlier arrays.** Eight arrays were flagged using a robust z-score above 4 on array median or upper quartile. All eight were controls (GSM119619, GSM119649, GSM119661, GSM119671, GSM119672, GSM119673, GSM119674, GSM119676). This rule was chosen after inspecting the QC plots, so it was tested in sensitivity analyses (below).
+3. **Filtering and normalisation.** The lowest 50% of probes by mean intensity were removed (27,337 of 54,675 retained) and arrays were quantile normalised.
+4. **Differential expression.** limma with brain region as a covariate, testing against a minimum 1.5-fold change (`treat`), Benjamini-Hochberg FDR < 0.05.
+5. **Annotation and enrichment.** Probes were mapped to gene symbols (first symbol for probes mapping to several genes). GO Biological Process enrichment used clusterProfiler with the genes on the array as background, run separately for genes higher and lower in AD.
+6. **Drug-gene mining.** The top 50 genes by significance were queried against DGIdb. An interaction was labelled direction-compatible if the drug inhibits, antagonises or negatively modulates a gene that is higher in AD, or activates a gene that is lower in AD.
+7. **Cross-tissue comparison.** Blood and brain results were collapsed to gene level (most significant probe per gene) and compared across all 11,762 shared genes.
 
 ## Results
 
 ### Differential expression
 
-2,972 probes met significance thresholds. The volcano plot below shows greater spread among downregulated genes than upregulated genes, consistent with the AD literature, where downregulation typically predominates, reflecting broad neuronal loss and reduced synaptic/metabolic activity.
+The primary model identified **2,353 probes** (1,385 higher, 968 lower in AD). Region is partly confounded with disease in this dataset (for example 23 AD and 11 control superior frontal samples), which is why it is included as a covariate.
+
+| Model | Significant probes |
+|---|---|
+| A. Original analysis (group only, all probes, abs log2FC > 1) | 2,972 |
+| B. Region-adjusted, all arrays, abs log2FC > log2(1.5) | 8,953 |
+| C. B with 8 flagged arrays removed | 9,157 |
+| D. C with quantile normalisation | 8,544 |
+| **E. D tested against a 1.5-fold minimum (primary)** | **2,353** |
+| F. E with all arrays and a flagged-array covariate | 2,141 |
+
+Models E and F share 2,120 probes and their log fold changes correlate at essentially 1, so the main result does not depend on excluding the flagged arrays. 1,924 of the original 2,972 probes remain significant in the primary model.
 
 ![Volcano plot](figures/volcano_plot_AD_vs_control.png)
-
-*Figure 1. Volcano plot of differential gene expression, AD vs. control (GSE5281). Red points met significance thresholds (adjusted p < 0.05, |log2FC| > 1); n = 2,972 significant probes.*
-
-Unsupervised hierarchical clustering of the top 30 differentially expressed genes largely recovered the known AD/control grouping without being given group labels, indicating a strong underlying transcriptional signal.
-
+![PCA](figures/pca_by_region_and_group.png)
 ![Heatmap](figures/heatmap_top30_genes.png)
 
-*Figure 2. Heatmap of top 30 differentially expressed genes by adjusted p-value, row-scaled expression, with hierarchical clustering of genes and samples.*
+### Pathway enrichment
 
-### Functional enrichment
+Genes lower in AD were enriched for aerobic respiration (adjusted p = 2.6e-10), cellular respiration, generation of precursor metabolites and energy, vesicle-mediated transport in synapse (adjusted p = 1.7e-7) and ATP synthesis-coupled electron transport. These match the mitochondrial and synaptic dysfunction widely reported in AD brain. Genes higher in AD showed weaker enrichment for differentiation, morphogenesis and metal-ion response terms (adjusted p about 0.007 to 0.009).
 
-GO Biological Process enrichment identified vesicle-mediated transport in synapse, synaptic vesicle cycle, aerobic/cellular respiration, and regulation of neuron projection development among the top enriched terms, aligning with two of the most established mechanisms in AD pathology, namely synaptic dysfunction and mitochondrial/metabolic impairment.
+![GO lower in AD](figures/go_enrichment_dotplot_lower_in_AD.png)
 
-![GO enrichment dot plot](figures/go_enrichment_dotplot.png)
+### Drug-gene mining
 
-*Figure 3. Dot plot of top enriched GO Biological Process terms. Dot size = gene count; colour = BH-adjusted p-value; x-axis = gene ratio.*
+DGIdb returned 457 interactions across 20 of the top 50 genes. Thirty interactions across 9 genes were direction-compatible, including inhibitors of PGF, ITPKB, SLC5A3, CDK13, WNK1, ACACB, THRA and MAP4K4. Genes lower in AD, such as SNAP25 and CDC37, appear in the database but an inhibitor of a downregulated gene is not a sensible hypothesis, so these serve as sanity checks. Some compatible drugs are large biologics (for example aflibercept and conbercept against PGF) that are unlikely to cross the blood-brain barrier, so central nervous system druggability would need separate assessment. Full tables are in `results/`.
 
-### Drug-target mining
+### Cross-tissue comparison with blood
 
-Querying the top 50 significant genes against DGIdb returned **449 gene-drug interactions**, with 19/50 genes having at least one known interaction. SNAP25, central to the synaptic vesicle cycle, was among the genes with known interactions. Its DGIdb partners are botulinum toxin compounds, which cleave SNAP25, so this serves as a check that the database mapping and the enrichment result point to the same biology, not as a therapeutic suggestion. Two separate analytical steps converging on the same biology.
+Across 11,762 shared genes, brain and blood moderated t statistics showed a small positive correlation (Spearman rho = 0.16, p = 1.3e-67). Of 1,415 brain-significant genes measured in both datasets, 792 (56%) moved in the same direction in blood (binomial p = 7.8e-6), and 367 of these were also nominally significant in blood (p < 0.05). The concordant genes with the strongest blood signal were mostly lower in both tissues and included mitochondrial and oxidative stress genes (ATP6V1E1, PSMA3, TXN, PRDX1, SOD1, COX7B). Blood is a different tissue, so this is evidence of partial agreement, not replication. The earlier threshold-based overlap test (p = 0.194) was underpowered because only 3 blood genes passed the threshold.
 
-*Note: interaction scores reflect DGIdb's internal weighting, not clinical efficacy. Approval status of individual compounds should be verified separately before any therapeutic interpretation.*
+## Limitations
 
-## Independent Validation (GSE63060)
+- Bulk post-mortem tissue, so some differences may reflect changes in cell composition or tissue quality, not only disease pathways.
+- A single brain cohort on a microarray platform, with no independent brain replication.
+- The outlier rule was chosen after inspecting the data. Sensitivity analyses show the result is stable, but this should be stated.
+- 6 to 9% of gene symbols did not map in enrichment analysis.
+- DGIdb is not exhaustive and an interaction is not evidence of efficacy. Expression changes may be consequences of disease, not causes.
 
-To address the single-dataset limitation directly, the differential expression pipeline was re-run on an independent, entirely separate dataset: [GSE63060](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE63060), 249 peripheral blood samples (145 AD, 104 control) from the AddNeuroMed Cohort, profiled on a different platform (Illumina HumanHT-12 V3.0, GPL6947) from a different patient population entirely.
+## Future work
 
-At the same significance thresholds (adjusted p < 0.05, |log2FC| > 1), 8 genes were significant in blood, of which 2 fell within the gene set shared across both microarray platforms. Of these, **NDUFA1** also appeared among the significant genes in the original brain-tissue analysis (GSE5281).
+Replicate in an independent brain cohort, fit region-specific models, estimate cell-type proportions, and repeat in RNA-seq data.
 
-To test whether this overlap exceeds chance, a hypergeometric test was run against the shared background of 17,201 genes measured on both platforms (1,758 significant in brain tissue, 2 significant-and-shared in blood, 1 gene in common), giving **p = 0.194, not statistically significant**. With only 2 genes from the blood dataset landing on the shared background, the test is underpowered, one overlapping gene out of two is too small a sample to distinguish "more overlap than chance" from noise in either direction. This is reported plainly rather than overstated. The honest conclusion is that this validation is inconclusive on statistical grounds, not that it confirms replication.
+## Reproducing
 
-What the overlap does offer is a biologically motivated observation rather than a statistically validated one. NDUFA1 is a subunit of mitochondrial Complex I (NADH:ubiquinone oxidoreductase), sitting within the aerobic/cellular respiration pathways identified independently through GO enrichment of the brain-tissue data (see Functional Enrichment above). This is consistent with, but does not statistically confirm, the pathway-level finding from a separate analytical step. A dataset with more significant genes surviving into the shared background (e.g. a larger blood cohort, or a less stringent significance threshold applied specifically for the validation step) would be needed for a properly powered test.
+Run in R 4.6.1 and Bioconductor 3.23 (Google Colab). Download `GSE5281_series_matrix.txt.gz` from GEO into a `data/` folder, then run `notebooks/ad_transcriptomics_analysis.ipynb` from top to bottom. The drug-gene step is `scripts/drug_target_mining.py` (needs pandas and requests). DGIdb results depend on the database version on the query date.
 
-## Discussion
-
-This analysis demonstrates that an unsupervised, purely computational approach applied to public transcriptomic data can recover established AD biology and identify existing pharmacological entry points without disease-specific assumptions built into the pipeline. The convergence between differential expression, pathway enrichment, and drug-target mining around synaptic mechanisms, most notably the SNAP25/botulinum toxin result, is consistent with the pipeline recovering known biology. Cross-dataset comparison against a second, tissue- and platform-distinct dataset (GSE63060) identified one gene (NDUFA1) common to both significant gene lists. A hypergeometric test found this overlap not statistically distinguishable from chance (p = 0.194), reflecting the limited statistical power available from only 8 significant blood genes rather than evidence against the finding. NDUFA1's role in mitochondrial Complex I is biologically consistent with the respiration-related pathways identified via GO enrichment, offering a plausible but not statistically confirmed link between the two datasets.
-
-## Limitations and Future Directions
-
-- **Underpowered cross-tissue validation.** Only 8 genes were significant in the blood dataset (2 on the shared background), too few for a well-powered overlap test. The hypergeometric result (p = 0.194) is inconclusive rather than confirmatory, and a larger blood cohort or relaxed validation-specific threshold would be needed to test this properly
-- **Interaction scores are not clinical efficacy.** DGIdb scores reflect database weighting, not approval status or therapeutic validity
-- **Correlative, not causal.** Functional validation (e.g. in vitro knockdown/rescue) would be needed to establish causal gene relevance
-- **Brain region not modelled as a covariate.** A region-stratified re-analysis of GSE5281 could reveal signal currently averaged out
-
-## Repository Structure
+## Repository structure
 
 ```
-├── README.md
-├── scripts/
-│   ├── differential_expression_analysis.R   # primary pipeline (GSE5281)
-│   ├── validation_analysis.R                # independent validation (GSE63060)
-│   └── drug_target_mining.py                # DGIdb query script
-└── figures/
-    ├── volcano_plot_AD_vs_control.png
-    ├── heatmap_top30_genes.png
-    └── go_enrichment_dotplot.png
+notebooks/   Full analysis notebook
+scripts/     drug_target_mining.py
+results/     Tables, enrichment results, sensitivity summary, session info
+figures/     QC, PCA, volcano, heatmap and GO plots
+legacy_original_analysis/   Original scripts (Model A)
 ```
-
-## References
-
-- Gene Expression Omnibus, accession GSE5281. National Center for Biotechnology Information.
-- Gene Expression Omnibus, accession GSE63060 (AddNeuroMed Cohort). National Center for Biotechnology Information.
-- Ritchie, M.E. et al. (2015) limma powers differential expression analyses for RNA-sequencing and microarray studies. *Nucleic Acids Research*.
-- Yu, G. et al. (2012) clusterProfiler: an R package for comparing biological themes among gene clusters. *OMICS*.
-- Freshour, S.L. et al. (2021) Integration of the Drug-Gene Interaction Database (DGIdb 4.0) with open crowdsource efforts. *Nucleic Acids Research*.
