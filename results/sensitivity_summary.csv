@@ -1,0 +1,8 @@
+"model","n_significant"
+"Original analysis (group only, all probes and arrays, abs log2FC > 1)",2972
+"Primary (region-adjusted, control probes and 8 flagged arrays removed, quantile normalised, treat vs 1.5-fold)",2316
+"Primary, ordinary test, no fold-change threshold",15574
+"Primary, ordinary test, abs log2FC > log2(1.5)",8501
+"Sensitivity, plus spike-in technical covariate, treat vs 1.5-fold",17
+"Sensitivity, plus technical covariate, ordinary test, abs log2FC > log2(1.5)",4056
+"Sensitivity, plus technical covariate, ordinary test, no threshold",5835
