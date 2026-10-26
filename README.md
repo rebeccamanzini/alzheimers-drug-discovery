@@ -6,6 +6,12 @@
 
 Alzheimer's disease (AD) is a leading cause of dementia with limited disease-modifying treatment. This project analyses a public microarray dataset of laser-capture microdissected cortical neurons from post-mortem AD and control brains (GEO GSE5281; 87 AD and 74 control samples from six regions) to test whether a transparent, reproducible pipeline recovers established AD biology, how robust that signal is, and whether it identifies genes with pharmacological relevance. Quality control revealed two technical issues. Affymetrix control probes appeared among the top results and were removed, and diagnosis was completely confounded with processing batch, with all controls and all AD samples falling in separate GEO accession ranges and a spike-in technical score that differs between groups. After removing 62 control probes and 8 outlier arrays and adjusting for brain region, limma identified 2,316 probes that differ by at least 1.5-fold (FDR < 0.05), of which 1,367 were higher and 949 lower in AD. Genes lower in AD were enriched for aerobic respiration, ATP synthesis-coupled electron transport and synaptic vesicle transport, and this enrichment persisted when a spike-in technical covariate was added to the model. Genes higher in AD gave inconsistent enrichment across models and are not interpreted. Querying the top 50 genes against the Drug Gene Interaction Database (DGIdb) returned 457 interactions across 20 genes, of which 30 across 9 genes were direction-compatible, meaning an inhibitor of a gene that is higher in AD. Comparison with an independent blood cohort (GSE63060, 249 arrays) showed modest cross-tissue concordance (Spearman rho = 0.16). The results are exploratory and are presented as hypotheses, not validated targets.
 
+## Key points
+
+- Recovers established AD biology, with lower expression of mitochondrial respiration and synaptic vesicle genes that persists after technical adjustment.
+- Detects and quantifies two technical problems, control probes among the top hits and complete confounding of diagnosis with processing batch, and tests how robust the results are to each.
+- Generates direction-aware drug-gene hypotheses (30 interactions across 9 genes) and shows modest, consistent agreement with an independent blood cohort.
+
 ## Research Question
 
 Can differential gene expression analysis of Alzheimer's disease brain tissue identify dysregulated genes with existing pharmacological relevance, and how robust is that signal to quality control choices, technical confounding and comparison across tissues?
@@ -54,7 +60,11 @@ The primary model identified 2,316 probes (1,367 higher, 949 lower in AD). Addin
 
 ![PCA by region and group](figures/pca_by_region_and_group.png)
 
+*PCA of all 161 arrays before outlier removal. The flagged arrays appear as isolated points away from the main cloud.*
+
 ![Heatmap of top 30 probes](figures/heatmap_top30_genes.png)
+
+*Probes with numeric suffixes (for example MIR612, MIR612.1, MIR612.2) are separate probes for the same gene, and probes shown by their identifier have no gene symbol. Samples cluster by diagnosis, but diagnosis is confounded with batch, so this clustering is not evidence of disease signal on its own.*
 
 ### Pathway enrichment
 
