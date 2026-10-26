@@ -1,0 +1,2 @@
+Primary. Blood arrays 249 (AD 145, control 104). Shared genes 11765. Spearman rho (t) 0.158 (p 1.62e-66). Primary-significant genes 1411, same direction in blood 794 (56.3%), binomial p 2.72e-06
+Technical-covariate adjusted. Blood arrays 249 (AD 145, control 104). Shared genes 11765. Spearman rho (t) 0.094 (p 1.06e-24). Primary-significant genes 1411, same direction in blood 800 (56.7%), binomial p 5.39e-07
