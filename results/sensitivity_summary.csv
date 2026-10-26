@@ -1,7 +1,0 @@
-"model","n_significant"
-"A original (group only, all probes, |log2FC| > 1)",2972
-"B region-adjusted, all arrays, |log2FC| > log2(1.5)",8953
-"C B with flagged arrays removed",9157
-"D C with quantile normalisation",8544
-"E D tested against 1.5-fold minimum (primary)",2353
-"F E with all arrays and a flagged-array covariate",2141
